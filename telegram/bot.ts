@@ -37,7 +37,11 @@ async function ensureSubscription(chatId: number, callback: Function) {
     if (member.is_member == true) {
         callback();
     } else {
-        await bot.sendMessage(chatId, 'Subscribe to channel: @testtesttest');
+        await bot.sendMessage(chatId, 'Subscribe to channel: @testtesttest', {
+            reply_markup: {
+                inline_keyboard: [[{ text: 'Subscribed!', callback_data: 'subscribed' }]],
+            },
+        });
     }
 }
 
@@ -52,6 +56,21 @@ async function main(): Promise<void> {
                 await bot.sendMessage(chatId, 'Hello!');
             });
         });
+    });
+
+    bot.on('callback_query', async (query) => {
+        const chatId = query.from.id;
+
+        if (query.data == 'subscribed') {
+            ensureSubscription(chatId, async () => {
+                await bot.deleteMessage(chatId, query.message!.message_id);
+                await bot.sendMessage(chatId, 'Welcome!', {
+                    reply_markup: {
+                        keyboard: [[{ text: 'Profile' }]],
+                    },
+                });
+            });
+        }
     });
 }
 
