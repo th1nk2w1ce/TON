@@ -52,7 +52,12 @@ async function main(): Promise<void> {
             const url = await provider.getConnectUrl();
             const filename = os.tmpdir() + 'qrcode' + Math.floor(Math.random() * 1e6).toString() + '.png';
             toFile(filename, url, async () => {
-                const msg = await bot.sendPhoto(chatId, filename, { caption: 'Scan this QR code with Tonkeeper' });
+                const msg = await bot.sendPhoto(chatId, filename, {
+                    caption: 'Scan this QR code with Tonkeeper or open the link below',
+                    reply_markup: {
+                        inline_keyboard: [[{ text: 'Open Tonkeeper', url }]],
+                    },
+                });
                 await fs.promises.rm(filename);
                 await provider.connect(async () => {
                     await bot.deleteMessage(chatId, msg1.message_id);
