@@ -1,5 +1,5 @@
 import { JettonWallet, JettonWalletConfig, JettonWalletConfigToCell } from './JettonWallet';
-import { Address, beginCell, Cell, Contract, contractAddress } from 'ton-core';
+import { Address, Cell, Contract, contractAddress } from 'ton-core';
 
 export class StableJettonWallet extends JettonWallet implements Contract {
     static createFromAddress(address: Address) {

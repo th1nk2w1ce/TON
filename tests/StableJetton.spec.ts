@@ -43,43 +43,31 @@ describe('StableJetton', () => {
 
     it('should deploy', async () => {});
 
-    it('should mint', async () => {
-        await jetton.sendMint(
-            wallets[0].getSender(),
-            toNano('0.05'),
-            toNano('0.01'),
-            wallets[1].address,
-            toNano('100')
-        );
+    it('should purchase stable for toncoin', async () => {
+        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
         const wallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[1].address))
+            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
         );
         expect(await wallet.getJettonBalance()).toEqual(toNano('100'));
     });
 
     it('should transfer', async () => {
-        await jetton.sendMint(
+        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
+        const wallet = blockchain.openContract(
+            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
+        );
+
+        await wallet.sendTransfer(
             wallets[0].getSender(),
             toNano('0.05'),
             toNano('0.01'),
             wallets[1].address,
-            toNano('100')
-        );
-        const wallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[1].address))
-        );
-
-        await wallet.sendTransfer(
-            wallets[1].getSender(),
-            toNano('0.05'),
-            toNano('0.01'),
-            wallets[2].address,
             toNano('30')
         );
 
         expect(await wallet.getJettonBalance()).toEqual(toNano('70'));
         const secondWallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[2].address))
+            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[1].address))
         );
         expect(await secondWallet.getJettonBalance()).toEqual(toNano('30'));
     });
