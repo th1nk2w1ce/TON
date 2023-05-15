@@ -10,6 +10,8 @@
 ;; ceil(6905000) = 10000000 ~= 0.01 TON
 int provide_address_gas_consumption() asm "10000000 PUSHINT";
 
+const int stable_price = 100;
+
 ;; storage scheme
 ;; storage#_ total_supply:Coins admin_address:MsgAddress content:^Cell jetton_wallet_code:^Cell = Storage;
 
@@ -69,7 +71,7 @@ int provide_address_gas_consumption() asm "10000000 PUSHINT";
     (int total_supply, slice admin_address, cell content, cell jetton_wallet_code) = load_data();
 
     if (op == op::mint()) {
-        int jetton_amount = (msg_value - 20000000) * 100; ;; multiply by price
+        int jetton_amount = (msg_value - 20000000) * stable_price; ;; multiply by price
         cell master_msg = begin_cell()
             .store_uint(0x178d4519, 32)
             .store_uint(query_id, 64)
@@ -101,6 +103,12 @@ int provide_address_gas_consumption() asm "10000000 PUSHINT";
                     .store_uint(query_id, 64);
             send_raw_message(msg.end_cell(), 2 + 64);
         }
+        send_raw_message(begin_cell()
+            .store_uint(0x10, 6)
+            .store_slice(from_address)
+            .store_coins(jetton_amount / stable_price - 20000000)
+            .store_uint(0, 107)
+        .end_cell(), 1);
         return ();
     }
 

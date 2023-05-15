@@ -60,6 +60,14 @@ export class JettonWallet implements Contract {
         });
     }
 
+    async sendBurn(provider: ContractProvider, via: Sender, value: bigint, amount: bigint) {
+        await provider.internal(via, {
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell().storeUint(0x595f07bc, 32).storeUint(0, 64).storeCoins(amount).storeUint(0, 2).endCell(),
+            value: value,
+        });
+    }
+
     async getJettonBalance(provider: ContractProvider) {
         let state = await provider.getState();
         if (state.state.type !== 'active') {

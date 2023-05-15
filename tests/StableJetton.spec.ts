@@ -71,4 +71,19 @@ describe('StableJetton', () => {
         );
         expect(await secondWallet.getJettonBalance()).toEqual(toNano('30'));
     });
+
+    it('should sell stable for toncoin', async () => {
+        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
+        const wallet = blockchain.openContract(
+            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
+        );
+
+        const result = await wallet.sendBurn(wallets[0].getSender(), toNano('0.05'), toNano('30'));
+        expect(await wallet.getJettonBalance()).toEqual(toNano('70'));
+        expect(result.transactions).toHaveTransaction({
+            from: jetton.address,
+            to: wallets[0].address,
+            value: toNano('0.28'),
+        });
+    });
 });
