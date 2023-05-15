@@ -1,29 +1,14 @@
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
+import { Address, Cell, Contract, contractAddress } from 'ton-core';
+import { Jetton, JettonConfig, JettonConfigToCell } from './Jetton';
 
-export type StableJettonConfig = {};
-
-export function stableJettonConfigToCell(config: StableJettonConfig): Cell {
-    return beginCell().endCell();
-}
-
-export class StableJetton implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
-
+export class StableJetton extends Jetton implements Contract {
     static createFromAddress(address: Address) {
         return new StableJetton(address);
     }
 
-    static createFromConfig(config: StableJettonConfig, code: Cell, workchain = 0) {
-        const data = stableJettonConfigToCell(config);
+    static createFromConfig(config: JettonConfig, code: Cell, workchain = 0) {
+        const data = JettonConfigToCell(config);
         const init = { code, data };
         return new StableJetton(contractAddress(workchain, init), init);
-    }
-
-    async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
-        await provider.internal(via, {
-            value,
-            sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().endCell(),
-        });
     }
 }

@@ -1,12 +1,12 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
 
-export type SecondaryJettonWalletConfig = {
+export type JettonWalletConfig = {
     owner: Address;
     minter: Address;
     walletCode: Cell;
 };
 
-export function secondaryJettonWalletConfigToCell(config: SecondaryJettonWalletConfig): Cell {
+export function JettonWalletConfigToCell(config: JettonWalletConfig): Cell {
     return beginCell()
         .storeCoins(0)
         .storeAddress(config.owner)
@@ -15,17 +15,17 @@ export function secondaryJettonWalletConfigToCell(config: SecondaryJettonWalletC
         .endCell();
 }
 
-export class SecondaryJettonWallet implements Contract {
+export class JettonWallet implements Contract {
     constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
 
     static createFromAddress(address: Address) {
-        return new SecondaryJettonWallet(address);
+        return new JettonWallet(address);
     }
 
-    static createFromConfig(config: SecondaryJettonWalletConfig, code: Cell, workchain = 0) {
-        const data = secondaryJettonWalletConfigToCell(config);
+    static createFromConfig(config: JettonWalletConfig, code: Cell, workchain = 0) {
+        const data = JettonWalletConfigToCell(config);
         const init = { code, data };
-        return new SecondaryJettonWallet(contractAddress(workchain, init), init);
+        return new JettonWallet(contractAddress(workchain, init), init);
     }
 
     async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {

@@ -1,29 +1,29 @@
-import { Blockchain, SandboxContract, Treasury, TreasuryContract } from '@ton-community/sandbox';
+import { Blockchain, SandboxContract, TreasuryContract } from '@ton-community/sandbox';
 import { Cell, toNano } from 'ton-core';
-import { SecondaryJetton } from '../wrappers/SecondaryJetton';
+import { Jetton } from '../wrappers/Jetton';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
-import { SecondaryJettonWallet } from '../wrappers/SecondaryJettonWallet';
+import { JettonWallet } from '../wrappers/JettonWallet';
 
-describe('SecondaryJetton', () => {
+describe('Jetton', () => {
     let minterCode: Cell;
     let walletCode: Cell;
 
     beforeAll(async () => {
-        minterCode = await compile('SecondaryJetton');
-        walletCode = await compile('SecondaryJettonWallet');
+        minterCode = await compile('Jetton');
+        walletCode = await compile('JettonWallet');
     });
 
     let blockchain: Blockchain;
-    let secondaryJetton: SandboxContract<SecondaryJetton>;
+    let jetton: SandboxContract<Jetton>;
     let wallets: SandboxContract<TreasuryContract>[];
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
         wallets = await blockchain.createWallets(10);
 
-        secondaryJetton = blockchain.openContract(
-            SecondaryJetton.createFromConfig(
+        jetton = blockchain.openContract(
+            Jetton.createFromConfig(
                 {
                     admin: wallets[0].address,
                     content: Cell.EMPTY,
@@ -32,10 +32,10 @@ describe('SecondaryJetton', () => {
                 minterCode
             )
         );
-        const deployResult = await secondaryJetton.sendDeploy(wallets[0].getSender(), toNano('0.05'));
+        const deployResult = await jetton.sendDeploy(wallets[0].getSender(), toNano('0.05'));
         expect(deployResult.transactions).toHaveTransaction({
             from: wallets[0].address,
-            to: secondaryJetton.address,
+            to: jetton.address,
             deploy: true,
             success: true,
         });
@@ -44,7 +44,7 @@ describe('SecondaryJetton', () => {
     it('should deploy', async () => {});
 
     it('should mint', async () => {
-        await secondaryJetton.sendMint(
+        await jetton.sendMint(
             wallets[0].getSender(),
             toNano('0.05'),
             toNano('0.01'),
@@ -52,13 +52,13 @@ describe('SecondaryJetton', () => {
             toNano('100')
         );
         const wallet = blockchain.openContract(
-            SecondaryJettonWallet.createFromAddress(await secondaryJetton.getWalletAddressOf(wallets[1].address))
+            JettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[1].address))
         );
         expect(await wallet.getJettonBalance()).toEqual(toNano('100'));
     });
 
     it('should transfer', async () => {
-        await secondaryJetton.sendMint(
+        await jetton.sendMint(
             wallets[0].getSender(),
             toNano('0.05'),
             toNano('0.01'),
@@ -66,7 +66,7 @@ describe('SecondaryJetton', () => {
             toNano('100')
         );
         const wallet = blockchain.openContract(
-            SecondaryJettonWallet.createFromAddress(await secondaryJetton.getWalletAddressOf(wallets[1].address))
+            JettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[1].address))
         );
 
         await wallet.sendTransfer(
@@ -79,7 +79,7 @@ describe('SecondaryJetton', () => {
 
         expect(await wallet.getJettonBalance()).toEqual(toNano('70'));
         const secondWallet = blockchain.openContract(
-            SecondaryJettonWallet.createFromAddress(await secondaryJetton.getWalletAddressOf(wallets[2].address))
+            JettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[2].address))
         );
         expect(await secondWallet.getJettonBalance()).toEqual(toNano('30'));
     });
