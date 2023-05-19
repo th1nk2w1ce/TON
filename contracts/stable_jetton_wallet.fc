@@ -253,3 +253,8 @@ int gas_consumption() asm "15000000 PUSHINT"; ;; 0.015 TON
   (int balance, slice owner_address, slice jetton_master_address, cell jetton_wallet_code, int staked, int profit, int last_unstake) = load_data();
   return (balance, owner_address, jetton_master_address, jetton_wallet_code);
 }
+
+(int, int, int) get_staking_data() method_id {
+    (int balance, slice owner_address, slice jetton_master_address, cell jetton_wallet_code, int staked, int profit, int last_unstake) = load_data();
+    return (staked, profit, last_unstake);
+}

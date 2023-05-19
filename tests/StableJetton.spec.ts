@@ -86,4 +86,12 @@ describe('StableJetton', () => {
             value: toNano('0.28'),
         });
     });
+
+    it('should return valid staking data', async () => {
+        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
+        const wallet = blockchain.openContract(
+            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
+        );
+        expect(await wallet.getStakingData()).toEqual([0n, 0n, 0n]);
+    });
 });
