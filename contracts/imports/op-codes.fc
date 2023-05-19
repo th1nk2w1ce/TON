@@ -7,3 +7,8 @@ int op::burn_notification() asm "0x7bdd97de PUSHINT";
 
 ;; Minter
 int op::mint() asm "21 PUSHINT";
+
+;; Staking
+int op::stake() asm "0x5166eb72 PUSHINT";
+int op::unstake() asm "0x6765d3ac PUSHINT";
+int op::claim() asm "0x709af73b PUSHINT";

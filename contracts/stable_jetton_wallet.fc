@@ -200,6 +200,18 @@ int gas_consumption() asm "15000000 PUSHINT"; ;; 0.015 TON
   save_data(balance, owner_address, jetton_master_address, jetton_wallet_code, staked, profit, last_unstake);
 }
 
+() stake (slice in_msg_body, slice sender_address, int msg_value, int fwd_fee) impure {
+
+}
+
+() unstake (slice in_msg_body, slice sender_address, int msg_value, int fwd_fee) impure {
+
+}
+
+() claim (slice in_msg_body, slice sender_address, int msg_value, int fwd_fee) impure {
+
+}
+
 () on_bounce (slice in_msg_body) impure {
   in_msg_body~skip_bits(32); ;; 0xFFFFFFFF
   (int balance, slice owner_address, slice jetton_master_address, cell jetton_wallet_code, int staked, int profit, int last_unstake) = load_data();
@@ -243,6 +255,21 @@ int gas_consumption() asm "15000000 PUSHINT"; ;; 0.015 TON
 
   if (op == op::burn()) { ;; burn
     burn_tokens(in_msg_body, sender_address, msg_value, fwd_fee);
+    return ();
+  }
+
+  if (op == op::stake()) { ;; stake
+    stake(in_msg_body, sender_address, msg_value, fwd_fee);
+    return ();
+  }
+
+  if (op == op::unstake()) { ;; unstake
+    unstake(in_msg_body, sender_address, msg_value, fwd_fee);
+    return ();
+  }
+
+  if (op == op::claim()) { ;; claim
+    claim(in_msg_body, sender_address, msg_value, fwd_fee);
     return ();
   }
 
