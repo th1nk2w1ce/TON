@@ -17,6 +17,7 @@ describe('StableJetton', () => {
     let blockchain: Blockchain;
     let jetton: SandboxContract<StableJetton>;
     let wallets: SandboxContract<TreasuryContract>[];
+    let wallet: SandboxContract<StableJettonWallet>;
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
@@ -39,24 +40,20 @@ describe('StableJetton', () => {
             deploy: true,
             success: true,
         });
+
+        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
+        wallet = blockchain.openContract(
+            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
+        );
     });
 
     it('should deploy', async () => {});
 
     it('should purchase stable for toncoin', async () => {
-        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
-        const wallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
-        );
         expect(await wallet.getJettonBalance()).toEqual(toNano('100'));
     });
 
     it('should transfer', async () => {
-        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
-        const wallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
-        );
-
         await wallet.sendTransfer(
             wallets[0].getSender(),
             toNano('0.05'),
@@ -73,11 +70,6 @@ describe('StableJetton', () => {
     });
 
     it('should sell stable for toncoin', async () => {
-        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
-        const wallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
-        );
-
         const result = await wallet.sendBurn(wallets[0].getSender(), toNano('0.05'), toNano('30'));
         expect(await wallet.getJettonBalance()).toEqual(toNano('70'));
         expect(result.transactions).toHaveTransaction({
@@ -88,10 +80,6 @@ describe('StableJetton', () => {
     });
 
     it('should return valid staking data', async () => {
-        await jetton.sendMint(wallets[0].getSender(), toNano('1.02'));
-        const wallet = blockchain.openContract(
-            StableJettonWallet.createFromAddress(await jetton.getWalletAddressOf(wallets[0].address))
-        );
         expect(await wallet.getStakingData()).toEqual([0n, 0n, 0n]);
     });
 });
